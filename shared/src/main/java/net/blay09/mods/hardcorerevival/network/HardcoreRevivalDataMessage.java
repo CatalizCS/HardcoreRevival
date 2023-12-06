@@ -28,11 +28,15 @@ public class HardcoreRevivalDataMessage {
     }
 
     public static HardcoreRevivalDataMessage decode(FriendlyByteBuf buf) {
-        int entityId = buf.readInt();
-        boolean knockedOut = buf.readBoolean();
-        int knockoutTicksPassed = buf.readInt();
-        boolean beingRescued = buf.readBoolean();
-        return new HardcoreRevivalDataMessage(entityId, knockedOut, knockoutTicksPassed, beingRescued);
+        if (buf.readableBytes() >= 4) {
+            buf.readerIndex(buf.readerIndex() + 4);
+            
+            int entityId = buf.readInt();
+            boolean knockedOut = buf.readBoolean();
+            int knockoutTicksPassed = buf.readInt();
+            boolean beingRescued = buf.readBoolean();
+            return new HardcoreRevivalDataMessage(entityId, knockedOut, knockoutTicksPassed, beingRescued);
+        }
     }
 
     public static void handle(Player player, HardcoreRevivalDataMessage message) {
