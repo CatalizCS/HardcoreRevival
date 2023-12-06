@@ -21,8 +21,20 @@ public class HardcoreRevivalDataMessage {
     }
 
     public static void encode(HardcoreRevivalDataMessage message, FriendlyByteBuf buf) {
-        if (buf.writeableBytes() >= 4) {
-            buf.writerIndex(buf.writerIndex() + 4);
+        int initialWriterIndex = buf.writerIndex();
+    
+        // Attempt to write data to the buffer
+        try {
+            buf.writeInt(message.entityId);
+            buf.writeBoolean(message.knockedOut);
+            buf.writeInt(message.knockoutTicksPassed);
+            buf.writeBoolean(message.beingRescued);
+        } catch (IndexOutOfBoundsException e) {
+            int requiredCapacity = initialWriterIndex + 4 * Integer.BYTES + 2 * Byte.BYTES;
+    
+            buf.capacity(requiredCapacity);
+    
+            buf.writerIndex(initialWriterIndex);
             buf.writeInt(message.entityId);
             buf.writeBoolean(message.knockedOut);
             buf.writeInt(message.knockoutTicksPassed);
@@ -31,16 +43,23 @@ public class HardcoreRevivalDataMessage {
     }
 
     public static HardcoreRevivalDataMessage decode(FriendlyByteBuf buf) {
-        if (buf.readableBytes() >= 4) {
-            buf.readerIndex(buf.readerIndex() + 4);
-            
-            int entityId = buf.readInt();
-            boolean knockedOut = buf.readBoolean();
-            int knockoutTicksPassed = buf.readInt();
-            boolean beingRescued = buf.readBoolean();
-            return new HardcoreRevivalDataMessage(entityId, knockedOut, knockoutTicksPassed, beingRescued);
+    try {
+        if (buf.readableBytes() < 4 * Integer.BYTES + 2 * Byte.BYTES) {
+            throw new IllegalStateException("Not enough data to read");
         }
+
+        int entityId = buf.readInt();
+        boolean knockedOut = buf.readBoolean();
+        int knockoutTicksPassed = buf.readInt();
+        boolean beingRescued = buf.readBoolean();
+
+        return new HardcoreRevivalDataMessage(entityId, knockedOut, knockoutTicksPassed, beingRescued);
+    } catch (Exception e) {
+        e.printStackTrace(); // Print the exception for debugging purposes
+
+        throw new IllegalStateException("Error decoding HardcoreRevivalDataMessage", e);
     }
+}
 
     public static void handle(Player player, HardcoreRevivalDataMessage message) {
         if (player != null) {
