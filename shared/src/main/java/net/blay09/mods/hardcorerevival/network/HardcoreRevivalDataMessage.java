@@ -27,6 +27,7 @@ public class HardcoreRevivalDataMessage {
             buf.writeBoolean(message.knockedOut);
             buf.writeInt(message.knockoutTicksPassed);
             buf.writeBoolean(message.beingRescued);
+        }
     }
 
     public static HardcoreRevivalDataMessage decode(FriendlyByteBuf buf) {
