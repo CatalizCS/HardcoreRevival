@@ -21,10 +21,12 @@ public class HardcoreRevivalDataMessage {
     }
 
     public static void encode(HardcoreRevivalDataMessage message, FriendlyByteBuf buf) {
-        buf.writeInt(message.entityId);
-        buf.writeBoolean(message.knockedOut);
-        buf.writeInt(message.knockoutTicksPassed);
-        buf.writeBoolean(message.beingRescued);
+        if (buf.writeableBytes() >= 4) {
+            buf.writerIndex(buf.writerIndex() + 4);
+            buf.writeInt(message.entityId);
+            buf.writeBoolean(message.knockedOut);
+            buf.writeInt(message.knockoutTicksPassed);
+            buf.writeBoolean(message.beingRescued);
     }
 
     public static HardcoreRevivalDataMessage decode(FriendlyByteBuf buf) {
